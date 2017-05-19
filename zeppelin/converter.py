@@ -12,21 +12,22 @@ ZeppelinConverter is a utility to convert Zeppelin raw json into Markdown
 
 class ZeppelinConverter:
 
-    def __init__(self, filename, user, date_created, date_updated):
+    MD_EXT = '.md'
+
+    def __init__(self, ifn, ofn, dire, user, date_created, date_updated):
         self.index = 0
-        self.filename = filename
+        self.input_filename = ifn
+        self.output_filename = ofn
+        self.directory = dire
         self.user = user
         self.date_created = date_created
         self.date_updated = date_updated
         self.out = []
 
-    def gen_header(self, t):
-
-        """ Generate the header for the Markdown file
-
-        """
+    def build_header(self, text):
+        """ Generate the header for the Markdown file """
         header = ['---',
-                  'title: ' + t['name'],
+                  'title: ' + text['name'],
                   'author(s): ' + self.user,
                   'tags: ',
                   'created_at: ' + self.date_created,
@@ -37,7 +38,131 @@ class ZeppelinConverter:
 
         self.out = header + self.out
 
-    def gen_markdown_body(self, t):
+    def build_markdown(self, lang, body):
+        if body is not None:
+            self.out.append(body)
+
+    def build_code(self, lang, body):
+        self.out.append("```" + lang)
+        self.build_markdown(lang, body)
+        self.out.append("```")
+
+    def process_input(self, paragraph):
+        """
+        Parses paragraph for the language of the code
+        and the code itself
+
+        """
+        try:
+            lang, body = paragraph.split(None, 1)
+        except ValueError:
+            lang, body = paragraph, None
+
+        if lang.strip().startswith('%'):
+            lang = 'scala'
+            body = paragraph
+
+        else:
+            lang = lang[1:]
+
+        if lang == 'md':
+            self.build_markdown(lang, body)
+        else:
+            self.build_code(lang, body)
+
+    def build_image(self, msg):
+        """
+        Strips msg of the base64 image encoding and outputs
+        the images to the specified directory
+
+        """
+        result = re.search('base64,(.*?)"', msg['data'])
+
+        if result is None:
+            return
+
+        self.index += 1
+        images_path = self.directory + '/images'
+        if not os.path.isdir(images_path):
+            os.makedirs(images_path)
+
+        with open('{0}/output_{1}.png'.format(images_path, self.index), 'wb') as fh:
+            fh.write(result.group(1).encode('utf-8').decode('base64'))
+
+        self.out.append('\n![png]({0}/output_{1}.png\n'.format(images_path, self.index))
+
+    def build_text(self, msg):
+        self.out.append(msg['data'])
+
+    def create_md_row(self, row, header=False):
+        """ Translate row into markdown format """
+        cols = row.split('\t')
+        col_md = '|'
+        underline_md = '|'
+
+        if cols:
+            for col in cols:
+                col_md += col + '|'
+                underline_md += '-|'
+
+        if header:
+            self.out.append(col_md + '\n' + underline_md)
+        else:
+            self.out.append(col_md)
+
+    def build_table(self, msg):
+        rows = msg['data'].split('\n')
+        if rows:
+            header_row = rows[0]
+            body_rows = rows[1:]
+            self.create_md_row(header_row, True)
+            for row in body_rows:
+                self.create_md_row(row)
+
+    def process_results(self, paragraph):
+
+        """ Output options
+
+        Routes Zeppelin output types to corresponding
+        functions for it to be handled. To add support for other output
+        types, add the file type to the dictionary and create the necessary
+        function to handle it.
+
+        """
+        output_options = {
+            'HTML': self.build_image,
+            'TEXT': self.build_text,
+            'TABLE': self.build_table
+        }
+
+        if 'editorMode' in paragraph['config']:
+            mode = paragraph['config']['editorMode'].split('/')[-1]
+            if paragraph['results']['msg']:
+                msg = paragraph['results']['msg'][0]
+                if mode not in ('text', 'markdown'):
+                    output_options[msg['type']](msg)
+
+    def parse_date(self, date):
+        return datetime.strptime(date, '%b %d, %Y %I:%M:%S %p')
+
+    def process_date_created(self, text):
+        """ Sets date_created to the oldest date """
+        if self.date_created == 'N/A':
+            self.date_created = text
+        if self.parse_date(text) < self.parse_date(self.date_created):
+            self.date_created = text
+
+    def process_date_updated(self, text):
+        """ Sets date_updated to the most recent date """
+        if self.date_updated == 'N/A':
+            self.date_updated = text
+        if self.parse_date(text) > self.parse_date(self.date_updated):
+            self.date_updated = text
+
+    def process_title(self, text):
+        self.out.append('#### ' + text)
+
+    def build_markdown_body(self, text):
 
         """ Generate the body for the Markdown file
 
@@ -49,143 +174,21 @@ class ZeppelinConverter:
             - print the output
 
         """
-        def gen_md(l, b):
-            if b is not None:
-                self.out.append(b)
-
-        def gen_code(l, b):
-            self.out.append("```" + l)
-            gen_md(l, b)
-            self.out.append("```")
-
-        """ Input options -- for now we don't need them
-        input_options = {
-            'md' : gen_md,
-            'python' : gen_code,
-            'pyspark' : gen_code,
-            'sql' : gen_code
-        }
-        """
-        def process_input(p):
-            try:
-                lang, body = p.split(None, 1)
-                # print lang
-            except:
-                lang, body = p, None
-
-            if lang.strip()[0] != '%':
-                lang = 'scala'
-                body = p
-
-            else:
-                lang = lang[1:]
-
-            if lang == 'md':
-                gen_md(lang, body)
-            else:
-                gen_code(lang, body)
-
-            # input_options[lang](lang, body)
-
-        def gen_image(m):
-            result = re.search('base64,(.*?)"', m['data'])
-
-            if result is None:
-                return
-
-            self.index += 1
-
-            if os.path.isdir('images') is False:
-                os.makedirs('images')
-
-            with open("images/output_" + str(self.index) + ".png", "wb") as fh:
-                fh.write(result.group(1).encode('utf-8').decode('base64'))
-
-            self.out.append("\n![png](images/output_" +
-                            str(self.index) + ".png)\n")
-
-        def gen_text(m):
-            self.out.append(m['data'])
-
-        def create_md_row(r, header=False):
-            cols = r.split('\t')
-            col_md = '|'
-            underline_md = '|'
-
-            if cols != []:
-                for col in cols:
-                    col_md += col + '|'
-                    underline_md += '-|'
-
-            if header:
-                self.out.append(col_md + '\n' + underline_md)
-            else:
-                self.out.append(col_md)
-
-        def gen_table(m):
-            rows = m['data'].split('\n')
-            if rows:
-                header_row = rows[0]
-                body_rows = rows[1:]
-                create_md_row(header_row, True)
-                for row in body_rows:
-                    create_md_row(row)
-
-        """ Output options
-
-        Routes Zeppelin output types to corresponding
-        functions for it to be handled. To add support for other output
-        types, add the file type to the dictionary and create the necessary
-        function to handle it.
-
-        """
-        output_options = {
-            'HTML': gen_image,
-            'TEXT': gen_text,
-            'TABLE': gen_table
-        }
-
-        def process_output(p):
-            if 'editorMode' in p['config']:
-                mode = p['config']['editorMode'].split('/')[-1]
-                if p['results']['msg']:
-                    msg = p['results']['msg'][0]
-                    if mode not in ('text', 'markdown'):
-                        output_options[msg['type']](msg)
-
-        def parse_date(d):
-            return datetime.strptime(d, '%b %d, %Y %I:%M:%S %p')
-
-        def process_date_created(t):
-            if self.date_created == 'N/A':
-                self.date_created = t
-            if parse_date(t) < parse_date(self.date_created):
-                self.date_created = t
-
-        def process_date_updated(t):
-            if self.date_updated == 'N/A':
-                self.date_updated = t
-            if parse_date(t) > parse_date(self.date_updated):
-                self.date_updated = t
-
-        def process_title(t):
-            self.out.append('#### ' + t)
-
-        for paragraph in t['paragraphs']:
+        for paragraph in text['paragraphs']:
             if 'user' in paragraph:
                 self.user = paragraph['user']
             if 'dateCreated' in paragraph:
-                process_date_created(paragraph['dateCreated'])
+                self.process_date_created(paragraph['dateCreated'])
             if 'dateUpdated' in paragraph:
-                process_date_updated(paragraph['dateUpdated'])
+                self.process_date_updated(paragraph['dateUpdated'])
             if 'title' in paragraph:
-                process_title(paragraph['title'])
+                self.process_title(paragraph['title'])
             if 'text' in paragraph:
-                process_input(paragraph['text'])
+                self.process_input(paragraph['text'])
             if 'results' in paragraph:
-                process_output(paragraph)
+                self.process_results(paragraph)
 
-    def gen_output(self, fout):
+    def build_output(self, fout):
         fout.write('\n'.join([s.encode('utf-8') for s in self.out]))
 
     def convert(self):
@@ -195,14 +198,14 @@ class ZeppelinConverter:
         saving the generated .png images into ./images.
 
         """
-
         try:
-            with open(self.filename, 'rb') as raw:
+            with open(self.input_filename, 'rb') as raw:
                 t = json.load(raw)
-                with open('knowledge.md', 'w') as fout:
-                    self.gen_markdown_body(t)   # create the body
-                    self.gen_header(t)          # create the md header
-                    self.gen_output(fout)       # write to file
+                full_path = os.path.join(self.directory, self.output_filename + self.MD_EXT)
+                with open(full_path, 'w') as fout:
+                    self.build_markdown_body(t)   # create the body
+                    self.build_header(t)          # create the md header
+                    self.build_output(fout)       # write to file
 
         except ValueError as err:
             print err
