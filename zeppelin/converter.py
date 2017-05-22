@@ -4,17 +4,18 @@ import re
 import os
 from datetime import datetime
 
-"""
-ZeppelinConverter is a utility to convert Zeppelin raw json into Markdown
-
-"""
-
 
 class ZeppelinConverter:
 
+    """
+    ZeppelinConverter is a utility to convert Zeppelin raw json into Markdown
+
+    """
     MD_EXT = '.md'
 
     def __init__(self, ifn, ofn, dire, user, date_created, date_updated):
+
+        """ Constructor """
         self.index = 0
         self.input_filename = ifn
         self.output_filename = ofn
@@ -25,6 +26,7 @@ class ZeppelinConverter:
         self.out = []
 
     def build_header(self, text):
+
         """ Generate the header for the Markdown file """
         header = ['---',
                   'title: ' + text['name'],
@@ -43,11 +45,14 @@ class ZeppelinConverter:
             self.out.append(body)
 
     def build_code(self, lang, body):
+
+        """ Wraps text with markdown specific flavour """
         self.out.append("```" + lang)
         self.build_markdown(lang, body)
         self.out.append("```")
 
     def process_input(self, paragraph):
+
         """
         Parses paragraph for the language of the code
         and the code itself
@@ -71,6 +76,7 @@ class ZeppelinConverter:
             self.build_code(lang, body)
 
     def build_image(self, msg):
+
         """
         Strips msg of the base64 image encoding and outputs
         the images to the specified directory
@@ -92,9 +98,12 @@ class ZeppelinConverter:
         self.out.append('\n![png]({0}/output_{1}.png\n'.format(images_path, self.index))
 
     def build_text(self, msg):
+
+        """ Adds text to output array """
         self.out.append(msg['data'])
 
     def create_md_row(self, row, header=False):
+
         """ Translate row into markdown format """
         cols = row.split('\t')
         col_md = '|'
@@ -111,6 +120,8 @@ class ZeppelinConverter:
             self.out.append(col_md)
 
     def build_table(self, msg):
+
+        """ Formats each row of the table """
         rows = msg['data'].split('\n')
         if rows:
             header_row = rows[0]
@@ -143,28 +154,49 @@ class ZeppelinConverter:
                     output_options[msg['type']](msg)
 
     def parse_date(self, date):
+
+        """
+        Converts string to date object. A sample string with this format
+        is 'Feb 29, 2017 04:39:59 pm'.
+
+        """
+
         return datetime.strptime(date, '%b %d, %Y %I:%M:%S %p')
 
     def process_date_created(self, text):
-        """ Sets date_created to the oldest date """
+
+        """
+        Sets date_created to the oldest date (date created).
+
+        """
         if self.date_created == 'N/A':
             self.date_created = text
         if self.parse_date(text) < self.parse_date(self.date_created):
             self.date_created = text
 
     def process_date_updated(self, text):
-        """ Sets date_updated to the most recent date """
+
+        """
+        Sets date_updated to the most recent date (updated date).
+
+        """
         if self.date_updated == 'N/A':
             self.date_updated = text
         if self.parse_date(text) > self.parse_date(self.date_updated):
             self.date_updated = text
 
     def process_title(self, text):
+
+        """
+        Appends hashtags before the title text to bold the title
+        in markdown.
+
+        """
         self.out.append('#### ' + text)
 
     def build_markdown_body(self, text):
 
-        """ Generate the body for the Markdown file
+        """ Generate the body for the Markdown file.
 
         - processes each json block one by one
         - for each block
@@ -189,6 +221,12 @@ class ZeppelinConverter:
                 self.process_results(paragraph)
 
     def build_output(self, fout):
+
+        """
+        Join every line in self.out with a new line and write the
+        result to the output file.
+
+        """
         fout.write('\n'.join([s.encode('utf-8') for s in self.out]))
 
     def convert(self):
@@ -203,9 +241,9 @@ class ZeppelinConverter:
                 t = json.load(raw)
                 full_path = os.path.join(self.directory, self.output_filename + self.MD_EXT)
                 with open(full_path, 'w') as fout:
-                    self.build_markdown_body(t)   # create the body
-                    self.build_header(t)          # create the md header
-                    self.build_output(fout)       # write to file
+                    self.build_markdown_body(t)  # create the body
+                    self.build_header(t)  # create the md header
+                    self.build_output(fout)  # write body and header to output file
 
         except ValueError as err:
             print err
