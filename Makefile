@@ -5,7 +5,7 @@
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = PythonZeppelin
-SOURCEDIR     = source
+SOURCEDIR     = docs
 BUILDDIR      = build
 
 # Put it first so that "make" without argument is like "make help".
