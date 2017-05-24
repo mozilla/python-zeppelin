@@ -82,7 +82,11 @@ class ZeppelinConverter:
             return
 
         self.index += 1
-        images_path = self.directory + '/images'
+        images_path = 'images'
+
+        if self.directory:
+            images_path = self.directory + '/' + images_path
+
         if not os.path.isdir(images_path):
             os.makedirs(images_path)
 
