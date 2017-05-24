@@ -5,7 +5,7 @@
 
 Welcome to Python Zeppelin's documentation!
 ===========================================
-Test
+Python Zeppelin is a utility that converts native Zeppelin notebooks into Markdown format.
 
 .. toctree::
    :maxdepth: 2
