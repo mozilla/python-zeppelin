@@ -1,4 +1,5 @@
 language: python
 python:
   - "2.7"
+before_script: "flake8"
 script: "python setup.py test"
