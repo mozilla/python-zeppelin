@@ -11,7 +11,7 @@ Python Zeppelin is a utility that converts native Zeppelin notebooks into Markdo
    :maxdepth: 2
    :caption: Contents:
 
-
+   zeppelin
 
 Indices and tables
 ==================
