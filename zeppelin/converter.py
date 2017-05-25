@@ -6,13 +6,14 @@ from datetime import datetime
 
 
 class ZeppelinConverter:
+    """ZeppelinConverter class.
+
+    ZeppelinConverter is a utility to convert Zeppelin raw json into Markdown.
     """
-    ZeppelinConverter is a utility to convert Zeppelin raw json into Markdown
-    """
+
     MD_EXT = '.md'
 
     def __init__(self, ifn, ofn, dire, user, date_created, date_updated):
-        """ Constructor """
         self.index = 0
         self.input_filename = ifn
         self.output_filename = ofn
@@ -23,7 +24,7 @@ class ZeppelinConverter:
         self.out = []
 
     def build_header(self, text):
-        """ Generate the header for the Markdown file """
+        """Generate the header for the Markdown file."""
         header = ['---',
                   'title: ' + text['name'],
                   'author(s): ' + self.user,
@@ -41,16 +42,13 @@ class ZeppelinConverter:
             self.out.append(body)
 
     def build_code(self, lang, body):
-        """ Wraps text with markdown specific flavour """
+        """Wrap text with markdown specific flavour."""
         self.out.append("```" + lang)
         self.build_markdown(lang, body)
         self.out.append("```")
 
     def process_input(self, paragraph):
-        """
-        Parses paragraph for the language of the code
-        and the code itself
-        """
+        """Parse paragraph for the language of the code and the code itself."""
         try:
             lang, body = paragraph.split(None, 1)
         except ValueError:
@@ -69,9 +67,10 @@ class ZeppelinConverter:
             self.build_code(lang, body)
 
     def build_image(self, msg):
-        """
+        """Convert base64 encoding to png.
+
         Strips msg of the base64 image encoding and outputs
-        the images to the specified directory
+        the images to the specified directory.
         """
         result = re.search('base64,(.*?)"', msg['data'])
 
@@ -89,11 +88,11 @@ class ZeppelinConverter:
         self.out.append('\n![png]({0}/output_{1}.png\n'.format(images_path, self.index))
 
     def build_text(self, msg):
-        """ Adds text to output array """
+        """Add text to output array."""
         self.out.append(msg['data'])
 
     def create_md_row(self, row, header=False):
-        """ Translate row into markdown format """
+        """Translate row into markdown format."""
         cols = row.split('\t')
         col_md = '|'
         underline_md = '|'
@@ -109,7 +108,7 @@ class ZeppelinConverter:
             self.out.append(col_md)
 
     def build_table(self, msg):
-        """ Formats each row of the table """
+        """Format each row of the table."""
         rows = msg['data'].split('\n')
         if rows:
             header_row = rows[0]
@@ -119,7 +118,7 @@ class ZeppelinConverter:
                 self.create_md_row(row)
 
     def process_results(self, paragraph):
-        """ Output options
+        """Output options.
 
         Routes Zeppelin output types to corresponding
         functions for it to be handled. To add support for other output
@@ -140,36 +139,35 @@ class ZeppelinConverter:
                     output_options[msg['type']](msg)
 
     def parse_date(self, date):
-        """
-        Converts string to date object. A sample string with this format
-        is 'Feb 29, 2017 04:39:59 pm'.
-        """
+        """Convert string to date object.
 
+        A sample string with this format is 'Feb 29, 2017 04:39:59 pm'.
+        """
         return datetime.strptime(date, '%b %d, %Y %I:%M:%S %p')
 
     def process_date_created(self, text):
-        """ Sets date_created to the oldest date (date created) """
+        """Set date_created to the oldest date (date created)."""
         if self.date_created == 'N/A':
             self.date_created = text
         if self.parse_date(text) < self.parse_date(self.date_created):
             self.date_created = text
 
     def process_date_updated(self, text):
-        """ Sets date_updated to the most recent date (updated date) """
+        """Set date_updated to the most recent date (updated date)."""
         if self.date_updated == 'N/A':
             self.date_updated = text
         if self.parse_date(text) > self.parse_date(self.date_updated):
             self.date_updated = text
 
     def process_title(self, text):
-        """
-        Appends hashtags before the title text to bold the title
-        in markdown.
+        """Append hashtags before the title.
+
+        This is done to bold the title in markdown.
         """
         self.out.append('#### ' + text)
 
     def build_markdown_body(self, text):
-        """ Generate the body for the Markdown file.
+        """Generate the body for the Markdown file.
 
         - processes each json block one by one
         - for each block
@@ -193,14 +191,16 @@ class ZeppelinConverter:
                 self.process_results(paragraph)
 
     def build_output(self, fout):
-        """
+        """Squash self.out into string.
+
         Join every line in self.out with a new line and write the
         result to the output file.
         """
         fout.write('\n'.join([s.encode('utf-8') for s in self.out]))
 
     def convert(self):
-        """
+        """Convert json to markdown.
+
         Takes in a .json file as input and convert it to Markdown format,
         saving the generated .png images into ./images.
         """
