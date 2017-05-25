@@ -10,5 +10,7 @@ setup(
     description='Converts Zeppelin JSON files to Markdown',
     keywords='zeppelin converter markdown',
     url='https://github.com/comloo/python-zeppelin',
-    packages=find_packages()
+    packages=find_packages(),
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest']
 )

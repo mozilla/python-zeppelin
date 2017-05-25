@@ -24,10 +24,10 @@ class ZeppelinConverter:
         self.date_updated = date_updated
         self.out = []
 
-    def build_header(self, text):
+    def build_header(self, title):
         """ Generate the header for the Markdown file """
         header = ['---',
-                  'title: ' + text['name'],
+                  'title: ' + title,
                   'author(s): ' + self.user,
                   'tags: ',
                   'created_at: ' + self.date_created,
@@ -58,12 +58,12 @@ class ZeppelinConverter:
         except ValueError:
             lang, body = paragraph, None
 
-        if lang.strip().startswith('%'):
+        if not lang.strip().startswith('%'):
             lang = 'scala'
-            body = paragraph
+            body = paragraph.strip()
 
         else:
-            lang = lang[1:]
+            lang = lang.strip()[1:]
 
         if lang == 'md':
             self.build_markdown(lang, body)
@@ -82,7 +82,11 @@ class ZeppelinConverter:
             return
 
         self.index += 1
-        images_path = self.directory + '/images'
+        images_path = 'images'
+
+        if self.directory:
+            images_path = self.directory + '/' + images_path
+
         if not os.path.isdir(images_path):
             os.makedirs(images_path)
 
@@ -96,19 +100,24 @@ class ZeppelinConverter:
 
     def create_md_row(self, row, header=False):
         """ Translate row into markdown format """
+        if not row:
+            return
         cols = row.split('\t')
-        col_md = '|'
-        underline_md = '|'
-
-        if cols:
-            for col in cols:
-                col_md += col + '|'
-                underline_md += '-|'
-
-        if header:
-            self.out.append(col_md + '\n' + underline_md)
+        if len(cols) == 1:
+            self.out.append(cols[0])
         else:
-            self.out.append(col_md)
+            col_md = '|'
+            underline_md = '|'
+
+            if cols:
+                for col in cols:
+                    col_md += col + '|'
+                    underline_md += '-|'
+
+            if header:
+                self.out.append(col_md + '\n' + underline_md)
+            else:
+                self.out.append(col_md)
 
     def build_table(self, msg):
         rows = msg['data'].split('\n')
@@ -203,9 +212,9 @@ class ZeppelinConverter:
                 t = json.load(raw)
                 full_path = os.path.join(self.directory, self.output_filename + self.MD_EXT)
                 with open(full_path, 'w') as fout:
-                    self.build_markdown_body(t)   # create the body
-                    self.build_header(t)          # create the md header
-                    self.build_output(fout)       # write to file
+                    self.build_markdown_body(t)  # create the body
+                    self.build_header(t['name'])  # create the md header
+                    self.build_output(fout)  # write to file
 
         except ValueError as err:
             print err
