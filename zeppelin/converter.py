@@ -212,9 +212,9 @@ class ZeppelinConverter:
                 t = json.load(raw)
                 full_path = os.path.join(self.directory, self.output_filename + self.MD_EXT)
                 with open(full_path, 'w') as fout:
-                    self.build_markdown_body(t)   # create the body
-                    self.build_header(t['name'])          # create the md header
-                    self.build_output(fout)       # write to file
+                    self.build_markdown_body(t)  # create the body
+                    self.build_header(t['name'])  # create the md header
+                    self.build_output(fout)  # write to file
 
         except ValueError as err:
             print err
