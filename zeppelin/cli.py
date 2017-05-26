@@ -1,6 +1,7 @@
 import os
 import argparse
 import json
+import sys
 from .new_converter import NewConverter as nc
 from .legacy_converter import LegacyConverter as lc
 

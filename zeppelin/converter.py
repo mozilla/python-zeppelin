@@ -1,13 +1,8 @@
-import sys
-import json
-import re
-import os
-import base64
 import abc
 from datetime import datetime
 
 
-class ZeppelinConverter(metaclass=abc.ABCMeta):
+class ZeppelinConverter(abc.ABC):
     """ZeppelinConverter class.
 
     ZeppelinConverter is a utility to convert Zeppelin raw json into Markdown.
@@ -40,6 +35,7 @@ class ZeppelinConverter(metaclass=abc.ABCMeta):
         self.out = header + self.out
 
     def build_markdown(self, lang, body):
+        """Append output with text body."""
         if body is not None:
             self.out.append(body)
 
