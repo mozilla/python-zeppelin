@@ -38,7 +38,7 @@ def main():
                 zeppelin_converter.convert(t, fout)
 
     except ValueError as err:
-        print (err)
+        print(err)
         sys.exit(1)
 
 
