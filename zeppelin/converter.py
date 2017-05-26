@@ -2,10 +2,12 @@ import sys
 import json
 import re
 import os
+import base64
+import abc
 from datetime import datetime
 
 
-class ZeppelinConverter:
+class ZeppelinConverter(metaclass=abc.ABCMeta):
     """ZeppelinConverter class.
 
     ZeppelinConverter is a utility to convert Zeppelin raw json into Markdown.
@@ -66,35 +68,6 @@ class ZeppelinConverter:
         else:
             self.build_code(lang, body)
 
-    def build_image(self, msg):
-        """Convert base64 encoding to png.
-
-        Strips msg of the base64 image encoding and outputs
-        the images to the specified directory.
-        """
-        result = re.search('base64,(.*?)"', msg['data'])
-
-        if result is None:
-            return
-
-        self.index += 1
-        images_path = 'images'
-
-        if self.directory:
-            images_path = self.directory + '/' + images_path
-
-        if not os.path.isdir(images_path):
-            os.makedirs(images_path)
-
-        with open('{0}/output_{1}.png'.format(images_path, self.index), 'wb') as fh:
-            fh.write(result.group(1).encode('utf-8').decode('base64'))
-
-        self.out.append('\n![png]({0}/output_{1}.png\n'.format(images_path, self.index))
-
-    def build_text(self, msg):
-        """Add text to output array."""
-        self.out.append(msg['data'])
-
     def create_md_row(self, row, header=False):
         """Translate row into markdown format."""
         if not row:
@@ -115,37 +88,6 @@ class ZeppelinConverter:
                 self.out.append(col_md + '\n' + underline_md)
             else:
                 self.out.append(col_md)
-
-    def build_table(self, msg):
-        """Format each row of the table."""
-        rows = msg['data'].split('\n')
-        if rows:
-            header_row = rows[0]
-            body_rows = rows[1:]
-            self.create_md_row(header_row, True)
-            for row in body_rows:
-                self.create_md_row(row)
-
-    def process_results(self, paragraph):
-        """Output options.
-
-        Routes Zeppelin output types to corresponding
-        functions for it to be handled. To add support for other output
-        types, add the file type to the dictionary and create the necessary
-        function to handle it.
-        """
-        output_options = {
-            'HTML': self.build_image,
-            'TEXT': self.build_text,
-            'TABLE': self.build_table
-        }
-
-        if 'editorMode' in paragraph['config']:
-            mode = paragraph['config']['editorMode'].split('/')[-1]
-            if paragraph['results']['msg']:
-                msg = paragraph['results']['msg'][0]
-                if mode not in ('text', 'markdown'):
-                    output_options[msg['type']](msg)
 
     def parse_date(self, date):
         """Convert string to date object.
@@ -175,53 +117,40 @@ class ZeppelinConverter:
         """
         self.out.append('#### ' + text)
 
-    def build_markdown_body(self, text):
-        """Generate the body for the Markdown file.
-
-        - processes each json block one by one
-        - for each block
-            - process the input by detecting the editor language
-            - print the input
-            - process the output by detecting the output format
-            - print the output
-        """
-        for paragraph in text['paragraphs']:
-            if 'user' in paragraph:
-                self.user = paragraph['user']
-            if 'dateCreated' in paragraph:
-                self.process_date_created(paragraph['dateCreated'])
-            if 'dateUpdated' in paragraph:
-                self.process_date_updated(paragraph['dateUpdated'])
-            if 'title' in paragraph:
-                self.process_title(paragraph['title'])
-            if 'text' in paragraph:
-                self.process_input(paragraph['text'])
-            if 'results' in paragraph:
-                self.process_results(paragraph)
-
     def build_output(self, fout):
         """Squash self.out into string.
 
         Join every line in self.out with a new line and write the
         result to the output file.
         """
-        fout.write('\n'.join([s.encode('utf-8') for s in self.out]))
+        fout.write('\n'.join([s for s in self.out]))
 
-    def convert(self):
+    def convert(self, t, fout):
         """Convert json to markdown.
 
         Takes in a .json file as input and convert it to Markdown format,
         saving the generated .png images into ./images.
         """
-        try:
-            with open(self.input_filename, 'rb') as raw:
-                t = json.load(raw)
-                full_path = os.path.join(self.directory, self.output_filename + self.MD_EXT)
-                with open(full_path, 'w') as fout:
-                    self.build_markdown_body(t)  # create the body
-                    self.build_header(t['name'])  # create the md header
-                    self.build_output(fout)  # write body and header to output file
+        self.build_markdown_body(t)  # create the body
+        self.build_header(t['name'])  # create the md header
+        self.build_output(fout)  # write body and header to output file
 
-        except ValueError as err:
-            print err
-            sys.exit(1)
+    @abc.abstractmethod
+    def build_table(self, msg):
+        """Format each row of the table."""
+
+    @abc.abstractmethod
+    def process_results(self, paragraph):
+        """Output options."""
+
+    @abc.abstractmethod
+    def build_markdown_body(self, text):
+        """Generate the body for the Markdown file."""
+
+    @abc.abstractmethod
+    def build_image(self, msg):
+        """Convert base64 encoding to png."""
+
+    @abc.abstractmethod
+    def build_text(self, msg):
+        """Add text to output array."""
