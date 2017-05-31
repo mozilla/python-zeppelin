@@ -1,5 +1,9 @@
 # Zeppelin Converter
 
+### Requirements
+
+- Python 3.\*
+- Cairo: `brew install cairo`
 ### Usage
 
 To convert a Zeppelin .json file into Markdown (.md), run `python -m zeppelin.cli -i <<INPUT>> -o <<OUTPUT>>` in the main directory.
