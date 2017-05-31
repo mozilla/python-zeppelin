@@ -1,10 +1,10 @@
 import pytest
-from zeppelin.converter import ZeppelinConverter
+from zeppelin.new_converter import NewConverter
 
 
 @pytest.fixture
 def zc():
-    zc = ZeppelinConverter('in', 'out', '', 'anonymous', 'N/A', 'N/A')
+    zc = NewConverter('in', 'out', '', 'anonymous', 'N/A', 'N/A')
     return zc
 
 
