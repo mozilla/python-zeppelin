@@ -5,10 +5,7 @@ from .converter import ZeppelinConverter
 
 
 class NewConverter(ZeppelinConverter):
-    """NewConverter class.
-
-    NewConverter converts Zeppelin version 0.7.1 notebooks to Markdown.
-    """
+    """NewConverter converts Zeppelin version 0.7.1 notebooks to Markdown."""
 
     MD_EXT = '.md'
 
@@ -19,7 +16,6 @@ class NewConverter(ZeppelinConverter):
         the images to the specified directory.
         """
         result = re.search('base64,(.*?)"', msg['data'])
-
         if result is None:
             return
 
@@ -27,7 +23,7 @@ class NewConverter(ZeppelinConverter):
         images_path = 'images'
 
         if self.directory:
-            images_path = self.directory + '/' + images_path
+            images_path = os.path.join(self.directory, images_path)
 
         if not os.path.isdir(images_path):
             os.makedirs(images_path)
@@ -53,12 +49,10 @@ class NewConverter(ZeppelinConverter):
                 self.create_md_row(row)
 
     def process_results(self, paragraph):
-        """Output options.
+        """Routes Zeppelin output types to corresponding handlers.
 
-        Routes Zeppelin output types to corresponding
-        functions for it to be handled. To add support for other output
-        types, add the file type to the dictionary and create the necessary
-        function to handle it.
+        To add support for other output types, add the file type to
+        the dictionary and create the necessary function to handle it.
         """
         output_options = {
             'HTML': self.build_image,

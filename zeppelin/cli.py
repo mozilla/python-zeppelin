@@ -2,9 +2,16 @@ import os
 import argparse
 import json
 import sys
-from .new_converter import NewConverter as nc
-from .legacy_converter import LegacyConverter as lc
+from .new_converter import NewConverter
+from .legacy_converter import LegacyConverter
 
+def check_version(text, args, directory):
+    if 'results' in text['paragraphs'][0]:
+        return NewConverter(args.in_filename, args.out_filename,
+                            directory)
+    else:
+        return LegacyConverter(args.in_filename, args.out_filename,
+                               directory)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -28,17 +35,11 @@ def main():
             t = json.load(raw)
             full_path = os.path.join(directory, args.out_filename + '.md')
             with open(full_path, 'w') as fout:
-                if 'results' in t['paragraphs'][0]:
-                    zeppelin_converter = nc(args.in_filename, args.out_filename,
-                                            directory, 'anonymous', 'N/A', 'N/A')
-                else:
-                    zeppelin_converter = lc(args.in_filename, args.out_filename,
-                                            directory, 'anonymous', 'N/A', 'N/A')
-
+                zeppelin_converter = check_version(t, args, directory)
                 zeppelin_converter.convert(t, fout)
 
     except ValueError as err:
-        print(err)
+        print('ERROR: Invalid JSON format')
         sys.exit(1)
 
 

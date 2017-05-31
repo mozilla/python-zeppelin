@@ -10,7 +10,8 @@ class ZeppelinConverter(abc.ABC):
 
     MD_EXT = '.md'
 
-    def __init__(self, ifn, ofn, dire, user, date_created, date_updated):
+    def __init__(self, ifn, ofn, dire, user='anonymous', date_created='N/A',
+                 date_updated='N/A'):
         self.index = 0
         self.input_filename = ifn
         self.output_filename = ofn
@@ -35,7 +36,7 @@ class ZeppelinConverter(abc.ABC):
         self.out = header + self.out
 
     def build_markdown(self, lang, body):
-        """Append output with text body."""
+        """Append paragraphs body to output string."""
         if body is not None:
             self.out.append(body)
 

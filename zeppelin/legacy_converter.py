@@ -5,10 +5,7 @@ from .converter import ZeppelinConverter
 
 
 class LegacyConverter(ZeppelinConverter):
-    """LegacyConverter class.
-
-    LegacyConverter converts Zeppelin version 0.6.2 notebooks to Markdown.
-    """
+    """LegacyConverter converts Zeppelin version 0.6.2 notebooks to Markdown."""
 
     MD_EXT = '.md'
 
@@ -26,7 +23,7 @@ class LegacyConverter(ZeppelinConverter):
         images_path = 'images'
 
         if self.directory:
-            images_path = self.directory + '/' + images_path
+            images_path = os.path.join(self.directory, images_path)
 
         if not os.path.isdir(images_path):
             os.makedirs(images_path)
@@ -52,12 +49,10 @@ class LegacyConverter(ZeppelinConverter):
                 self.create_md_row(row)
 
     def process_results(self, paragraph):
-        """Output options.
+        """Routes Zeppelin output types to corresponding handlers.
 
-        Routes Zeppelin output types to corresponding
-        functions for it to be handled. To add support for other output
-        types, add the file type to the dictionary and create the necessary
-        function to handle it.
+        To add support for other output types, add the file type to
+        the dictionary and create the necessary function to handle it.
         """
         output_options = {
             'HTML': self.build_image,
