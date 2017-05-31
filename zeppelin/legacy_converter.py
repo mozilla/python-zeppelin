@@ -42,8 +42,7 @@ class LegacyConverter(ZeppelinConverter):
         """Format each row of the table."""
         rows = msg.split('\n')
         if rows:
-            header_row = rows[0]
-            body_rows = rows[1:]
+            header_row, *body_rows = rows
             self.create_md_row(header_row, True)
             for row in body_rows:
                 self.create_md_row(row)
