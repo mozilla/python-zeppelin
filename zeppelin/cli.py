@@ -5,6 +5,7 @@ import sys
 from .new_converter import NewConverter
 from .legacy_converter import LegacyConverter
 
+
 def check_version(text, args, directory):
     if 'results' in text['paragraphs'][0]:
         return NewConverter(args.in_filename, args.out_filename,
@@ -12,6 +13,7 @@ def check_version(text, args, directory):
     else:
         return LegacyConverter(args.in_filename, args.out_filename,
                                directory)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -38,7 +40,7 @@ def main():
                 zeppelin_converter = check_version(t, args, directory)
                 zeppelin_converter.convert(t, fout)
 
-    except ValueError as err:
+    except ValueError:
         print('ERROR: Invalid JSON format')
         sys.exit(1)
 

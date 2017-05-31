@@ -3,10 +3,7 @@ from datetime import datetime
 
 
 class ZeppelinConverter(abc.ABC):
-    """ZeppelinConverter class.
-
-    ZeppelinConverter is a utility to convert Zeppelin raw json into Markdown.
-    """
+    """ZeppelinConverter is a utility to convert Zeppelin raw json into Markdown."""
 
     MD_EXT = '.md'
 
