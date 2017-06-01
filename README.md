@@ -2,8 +2,9 @@
 
 ### Requirements
 
-- Python 3.\*
-- Cairo: `brew install cairo`
+- Python 3.\* (Tested on Python 3.6 -- may work on other versions)
+- Cairo: `python-zeppelin` relies on CairoSVG to convert SVG to PNG. For CairoSVG to function, Cairo must be installed on your system.
+
 ### Usage
 
 To convert a Zeppelin .json file into Markdown (.md), run `python -m zeppelin.cli -i <<INPUT>> -o <<OUTPUT>>` in the main directory.
