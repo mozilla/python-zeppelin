@@ -1,13 +1,11 @@
 import re
 import os
 import base64
-from .converter import ZeppelinConverter
+from .converter import MarkdownConverter
 
 
 class NewConverter(ZeppelinConverter):
     """NewConverter converts Zeppelin version 0.7.1 notebooks to Markdown."""
-
-    MD_EXT = '.md'
 
     def build_image(self, msg):
         """Convert base64 encoding to png.

@@ -1,13 +1,11 @@
 import re
 import os
 import cairosvg
-from .converter import ZeppelinConverter
+from .converter import MarkdownConverter
 
 
 class LegacyConverter(ZeppelinConverter):
     """LegacyConverter converts Zeppelin version 0.6.2 notebooks to Markdown."""
-
-    MD_EXT = '.md'
 
     def build_image(self, msg):
         """Convert svg encoding to png.
@@ -67,11 +65,12 @@ class LegacyConverter(ZeppelinConverter):
         """Generate the body for the Markdown file.
 
         - processes each json block one by one
-        - for each block
-            - process the input by detecting the editor language
-            - print the input
-            - process the output by detecting the output format
-            - print the output
+        - for each block, process:
+            - the creator of the notebook (user)
+            - the date the notebook was created
+            - the date the notebook was last updated
+            - the input by detecting the editor language
+            - the output by detecting the output format
         """
         for paragraph in text['paragraphs']:
             if 'user' in paragraph:

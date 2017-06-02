@@ -3,7 +3,7 @@
 ### Requirements
 
 - Python 3.\* (Tested on Python 3.6 -- may work on other versions)
-- Cairo: `python-zeppelin` relies on CairoSVG to convert SVG to PNG. For CairoSVG to function, Cairo must be installed on your system.
+- Cairo: `python-zeppelin` relies on CairoSVG to convert SVG to PNG. Please refer to the [CairoSVG documentation](http://cairosvg.org/documentation/#installation) for installation instructions.
 
 ### Usage
 

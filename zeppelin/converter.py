@@ -2,17 +2,17 @@ import abc
 from datetime import datetime
 
 
-class ZeppelinConverter(abc.ABC):
+class MarkdownConverter(abc.ABC):
     """ZeppelinConverter is a utility to convert Zeppelin raw json into Markdown."""
 
     MD_EXT = '.md'
 
-    def __init__(self, ifn, ofn, dire, user='anonymous', date_created='N/A',
-                 date_updated='N/A'):
+    def __init__(self, input_filename, output_filename, directory, user='anonymous',
+                 date_created='N/A', date_updated='N/A'):
         self.index = 0
-        self.input_filename = ifn
-        self.output_filename = ofn
-        self.directory = dire
+        self.input_filename = input_filename
+        self.output_filename = output_filename
+        self.directory = directory
         self.user = user
         self.date_created = date_created
         self.date_updated = date_updated
@@ -119,14 +119,14 @@ class ZeppelinConverter(abc.ABC):
         """
         fout.write('\n'.join([s for s in self.out]))
 
-    def convert(self, t, fout):
+    def convert(self, json, fout):
         """Convert json to markdown.
 
         Takes in a .json file as input and convert it to Markdown format,
         saving the generated .png images into ./images.
         """
-        self.build_markdown_body(t)  # create the body
-        self.build_header(t['name'])  # create the md header
+        self.build_markdown_body(json)  # create the body
+        self.build_header(json['name'])  # create the md header
         self.build_output(fout)  # write body and header to output file
 
     @abc.abstractmethod

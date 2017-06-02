@@ -6,14 +6,11 @@ from .new_converter import NewConverter
 from .legacy_converter import LegacyConverter
 
 
-def check_version(text, args, directory):
+def get_version(text):
     if 'results' in text['paragraphs'][0]:
-        return NewConverter(args.in_filename, args.out_filename,
-                            directory)
+        return '0.7.1'
     else:
-        return LegacyConverter(args.in_filename, args.out_filename,
-                               directory)
-
+        return '0.6.2'
 
 def main():
     parser = argparse.ArgumentParser()
@@ -32,17 +29,24 @@ def main():
     else:
         args.out_filename = 'knowledge'
 
-    try:
-        with open(args.in_filename, 'rb') as raw:
+    with open(args.in_filename, 'rb') as raw:
+        try:
             t = json.load(raw)
             full_path = os.path.join(directory, args.out_filename + '.md')
-            with open(full_path, 'w') as fout:
-                zeppelin_converter = check_version(t, args, directory)
-                zeppelin_converter.convert(t, fout)
+        except ValueError:
+            print('ERROR: Invalid JSON format')
+            sys.exit(1)
 
-    except ValueError:
-        print('ERROR: Invalid JSON format')
-        sys.exit(1)
+    version = get_version(t)
+    if version == '0.7.1':
+        zeppelin_converter = NewConverter(args.in_filename, args.out_filename,
+                                          directory)
+    elif version == '0.6.2':
+        zeppelin_converter = LegacyConverter(args.in_filename, args.out_filename,
+                                             directory)
+
+    with open(full_path, 'w') as fout:
+        zeppelin_converter.convert(t, fout)
 
 
 if __name__ == '__main__':
