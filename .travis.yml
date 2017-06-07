@@ -3,8 +3,8 @@ python:
   - "3.6"
 before_install:
   - brew update
+  - brew install cairo
 install:
   - pip install flake8==3.3.0
-  - brew install cairo
 before_script: "flake8 zeppelin tests"
 script: "python setup.py test"
