@@ -165,7 +165,7 @@ class MarkdownConverter(abc.ABC):
             for key, handler in key_options.items():
                 if key in paragraph:
                     handler(paragraph[key])
-                    
+
             if self.RESULT_KEY in paragraph:
                 self.process_results(paragraph)
 
@@ -204,7 +204,6 @@ class MarkdownConverter(abc.ABC):
 
         with open('{0}/output_{1}.png'.format(images_path, self.index), 'wb') as fh:
             self.write_image_to_disk(msg, result, fh)
-            # fh.write(base64.b64decode(result.group(1).encode('utf-8')))
 
         self.out.append(
             '\n![png]({0}/output_{1}.png)\n'.format(images_path, self.index))
