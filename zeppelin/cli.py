@@ -12,6 +12,7 @@ def get_version(text):
     else:
         return '0.6.2'
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', dest='in_filename', required=True,
