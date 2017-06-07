@@ -151,17 +151,21 @@ class MarkdownConverter(abc.ABC):
             - the input by detecting the editor language
             - the output by detecting the output format
         """
+        key_options = {
+            'dateCreated': self.process_date_created,
+            'dateUpdated': self.process_date_updated,
+            'title': self.process_title,
+            'text': self.process_input
+        }
+
         for paragraph in text['paragraphs']:
             if 'user' in paragraph:
                 self.user = paragraph['user']
-            if 'dateCreated' in paragraph:
-                self.process_date_created(paragraph['dateCreated'])
-            if 'dateUpdated' in paragraph:
-                self.process_date_updated(paragraph['dateUpdated'])
-            if 'title' in paragraph:
-                self.process_title(paragraph['title'])
-            if 'text' in paragraph:
-                self.process_input(paragraph['text'])
+
+            for key, handler in key_options.items():
+                if key in paragraph:
+                    handler(paragraph[key])
+                    
             if self.RESULT_KEY in paragraph:
                 self.process_results(paragraph)
 
