@@ -1,10 +1,9 @@
 language: python
-os: osx
 python:
   - "3.6"
 before_install:
-  - brew update
-  - brew install cairo
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; brew install cairo
 install:
   - pip install flake8==3.3.0
 before_script: "flake8 zeppelin tests"
