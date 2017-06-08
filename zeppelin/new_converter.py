@@ -20,7 +20,7 @@ class NewConverter(MarkdownConverter):
         """Routes Zeppelin output types to corresponding handlers."""
         if 'editorMode' in paragraph['config']:
             mode = paragraph['config']['editorMode'].split('/')[-1]
-            if paragraph['results']['msg']:
+            if 'results' in paragraph and paragraph['results']['msg']:
                 msg = paragraph['results']['msg'][0]
                 if mode not in ('text', 'markdown'):
                     self.output_options[msg['type']](msg['data'])

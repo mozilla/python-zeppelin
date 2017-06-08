@@ -18,6 +18,6 @@ class LegacyConverter(MarkdownConverter):
 
     def process_results(self, paragraph):
         """Route Zeppelin output types to corresponding handlers."""
-        if paragraph['result']['msg']:
+        if 'result' in paragraph and paragraph['result']['msg']:
             msg = paragraph['result']['msg']
             self.output_options[paragraph['result']['type']](msg)

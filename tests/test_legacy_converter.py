@@ -1,10 +1,10 @@
 import pytest
-from zeppelin.new_converter import NewConverter
+from zeppelin.legacy_converter import LegacyConverter
 
 
 @pytest.fixture
 def zc():
-    zc = NewConverter('in', 'out', '', 'anonymous', 'N/A', 'N/A')
+    zc = LegacyConverter('in', 'out', '', 'anonymous', 'N/A', 'N/A')
     return zc
 
 
@@ -79,40 +79,25 @@ def test_create_md_row_header(zc):
 def test_find_message(zc):
     data = 'nothing here'
     assert zc.find_message(data) is None
-    data = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfgAAAH4CAYAAACmKP9/A"'
-    assert zc.find_message(data).group(1) == 'iVBORw0KGgoAAAANSUhEUgAAAfgAAAH4CAYAAACmKP9/A'
+    data = '\u003c?xml version\u003d\"1.0\" encoding\u003d\"utf-8\"'
+    assert zc.find_message(data).group(0) == 'xml version'
 
 
 def test_process_results(zc):
+    paragraph = {}
+    zc.process_results(paragraph)
+    assert zc.out == []
     paragraph = {
-        'config': {
-            'editorMode': 'ace/mode/markdown'
+        'result': {
+            'msg': ''
         }
     }
     zc.process_results(paragraph)
     assert zc.out == []
     paragraph = {
-        'config': {
-            'editorMode': 'ace/mode/markdown'
-        },
-        'results': {
-            'msg': [{
-                'type': 'TEXT',
-                'data': 'one ring to bring them all'
-            }]
-        }
-    }
-    zc.process_results(paragraph)
-    assert zc.out == []
-    paragraph = {
-        'config': {
-            'editorMode': 'ace/mode/r'
-        },
-        'results': {
-            'msg': [{
-                'type': 'TEXT',
-                'data': 'one ring to bring them all'
-            }]
+        'result': {
+            'msg': 'one ring to bring them all',
+            'type': 'TEXT'
         }
     }
     zc.process_results(paragraph)
