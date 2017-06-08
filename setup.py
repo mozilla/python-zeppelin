@@ -11,6 +11,6 @@ setup(
     keywords='zeppelin converter markdown',
     url='https://github.com/comloo/python-zeppelin',
     packages=find_packages(),
-    setup_requires=['pytest-runner', 'pycairo', 'cairosvg'],
+    setup_requires=['pytest-runner', 'cairosvg'],
     tests_require=['pytest']
 )
