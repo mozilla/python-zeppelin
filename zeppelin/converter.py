@@ -1,3 +1,8 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+
 import abc
 import os
 from datetime import datetime
@@ -7,11 +12,12 @@ class MarkdownConverter(abc.ABC):
     """ZeppelinConverter is a utility to convert Zeppelin raw json into Markdown."""
 
     @abc.abstractproperty
-    def RESULT_KEY(self):
+    def _RESULT_KEY(self):
         pass
 
     def __init__(self, input_filename, output_filename, directory, user='anonymous',
                  date_created='N/A', date_updated='N/A'):
+        """Initialize class object with attributes based on CLI inputs."""
         self.index = 0
         self.input_filename = input_filename
         self.output_filename = output_filename
@@ -166,7 +172,7 @@ class MarkdownConverter(abc.ABC):
                 if key in paragraph:
                     handler(paragraph[key])
 
-            if self.RESULT_KEY in paragraph:
+            if self._RESULT_KEY in paragraph:
                 self.process_results(paragraph)
 
     def build_text(self, msg):

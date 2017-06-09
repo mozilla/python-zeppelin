@@ -7,6 +7,7 @@ from .legacy_converter import LegacyConverter
 
 
 def get_version(text):
+    """Return correct version of Zeppelin file based on JSON format."""
     if 'results' in text['paragraphs'][0]:
         return '0.7.1'
     else:
@@ -14,6 +15,12 @@ def get_version(text):
 
 
 def main():
+    """Entry point.
+
+    - Loads in Zeppelin notebook
+    - Gets the version of the notebook
+    - Converts it into markdown format
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', dest='in_filename', required=True,
                         help='Zeppelin notebook input file (.json)')
