@@ -11,7 +11,7 @@ from .converter import MarkdownConverter
 class NewConverter(MarkdownConverter):
     """NewConverter converts Zeppelin version 0.7.1 notebooks to Markdown."""
 
-    RESULT_KEY = 'results'
+    _RESULT_KEY = 'results'
 
     def find_message(self, msg):
         """Use regex to find encoded image."""

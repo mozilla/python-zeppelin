@@ -11,7 +11,7 @@ from .converter import MarkdownConverter
 class LegacyConverter(MarkdownConverter):
     """LegacyConverter converts Zeppelin version 0.6.2 notebooks to Markdown."""
 
-    RESULT_KEY = 'result'
+    _RESULT_KEY = 'result'
 
     def find_message(self, msg):
         """Use regex to find encoded image."""
