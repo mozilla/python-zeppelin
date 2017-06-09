@@ -1,10 +1,15 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+
 import pytest
-from zeppelin.converter import ZeppelinConverter
+from zeppelin.legacy_converter import LegacyConverter
 
 
 @pytest.fixture
 def zc():
-    zc = ZeppelinConverter('in', 'out', '', 'anonymous', 'N/A', 'N/A')
+    zc = LegacyConverter('in', 'out', '', 'anonymous', 'N/A', 'N/A')
     return zc
 
 
@@ -49,11 +54,9 @@ def test_process_input(zc, test_input, expected):
 
 
 def test_build_text(zc):
-    msg = {
-        'data': 'sample text'
-    }
-    zc.build_text(msg)
-    assert zc.out == ['sample text']
+    zc.build_text('one ring to rule them all')
+    zc.build_text('one ring to find them')
+    assert zc.out == ['one ring to rule them all', 'one ring to find them']
 
 
 def test_title(zc):
@@ -76,3 +79,31 @@ def test_create_md_row(zc, test_input, expected):
 def test_create_md_row_header(zc):
     zc.create_md_row('test\ttest2', True)
     assert zc.out == ['|test|test2|\n|-|-|']
+
+
+def test_find_message(zc):
+    data = 'nothing here'
+    assert zc.find_message(data) is None
+    data = '\u003c?xml version\u003d\"1.0\" encoding\u003d\"utf-8\"'
+    assert zc.find_message(data).group(0) == 'xml version'
+
+
+def test_process_results(zc):
+    paragraph = {}
+    zc.process_results(paragraph)
+    assert zc.out == []
+    paragraph = {
+        'result': {
+            'msg': ''
+        }
+    }
+    zc.process_results(paragraph)
+    assert zc.out == []
+    paragraph = {
+        'result': {
+            'msg': 'one ring to bring them all',
+            'type': 'TEXT'
+        }
+    }
+    zc.process_results(paragraph)
+    assert zc.out == ['one ring to bring them all']

@@ -1,5 +1,10 @@
 # Zeppelin Converter
 
+### Requirements
+
+- Python 3.\* (Tested on Python 3.6 -- may work on other versions)
+- Cairo: `python-zeppelin` relies on CairoSVG to convert SVG to PNG. Please refer to the [CairoSVG documentation](http://cairosvg.org/documentation/#installation) for installation instructions.
+
 ### Usage
 
 To convert a Zeppelin .json file into Markdown (.md), run `python -m zeppelin.cli -i <<INPUT>> -o <<OUTPUT>>` in the main directory.
