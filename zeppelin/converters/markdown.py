@@ -5,6 +5,9 @@
 
 import abc
 import os
+import cairosvg
+import re
+import base64
 from datetime import datetime
 
 
@@ -225,3 +228,46 @@ class MarkdownConverter(abc.ABC):
     @abc.abstractmethod
     def process_results(self, paragraph):
         """Route Zeppelin output types to corresponding handlers."""
+
+
+class LegacyConverter(MarkdownConverter):
+    """LegacyConverter converts Zeppelin version 0.6.2 notebooks to Markdown."""
+
+    _RESULT_KEY = 'result'
+
+    def find_message(self, msg):
+        """Use regex to find encoded image."""
+        return re.search('xml version', msg)
+
+    def write_image_to_disk(self, msg, result, fh):
+        """Decode message to PNG and write to disk."""
+        cairosvg.svg2png(bytestring=msg.encode('utf-8'), write_to=fh)
+
+    def process_results(self, paragraph):
+        """Route Zeppelin output types to corresponding handlers."""
+        if 'result' in paragraph and paragraph['result']['msg']:
+            msg = paragraph['result']['msg']
+            self.output_options[paragraph['result']['type']](msg)
+
+
+class NewConverter(MarkdownConverter):
+    """NewConverter converts Zeppelin version 0.7.1 notebooks to Markdown."""
+
+    _RESULT_KEY = 'results'
+
+    def find_message(self, msg):
+        """Use regex to find encoded image."""
+        return re.search('base64,(.*?)"', msg)
+
+    def write_image_to_disk(self, msg, result, fh):
+        """Decode message to PNG and write to disk."""
+        fh.write(base64.b64decode(result.group(1).encode('utf-8')))
+
+    def process_results(self, paragraph):
+        """Routes Zeppelin output types to corresponding handlers."""
+        if 'editorMode' in paragraph['config']:
+            mode = paragraph['config']['editorMode'].split('/')[-1]
+            if 'results' in paragraph and paragraph['results']['msg']:
+                msg = paragraph['results']['msg'][0]
+                if mode not in ('text', 'markdown'):
+                    self.output_options[msg['type']](msg['data'])

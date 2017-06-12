@@ -2,8 +2,8 @@ import os
 import argparse
 import json
 import sys
-from .new_converter import NewConverter
-from .legacy_converter import LegacyConverter
+from ..converters.markdown import NewConverter
+from ..converters.markdown import LegacyConverter
 
 
 def get_version(text):
