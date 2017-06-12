@@ -4,7 +4,7 @@
 
 
 import pytest
-from zeppelin.legacy_converter import LegacyConverter
+from zeppelin.converters.markdown import LegacyConverter
 
 
 @pytest.fixture
