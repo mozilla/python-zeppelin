@@ -1,4 +1,4 @@
-# Zeppelin Converter
+# Zeppelin Converter [![Build Status](https://travis-ci.org/mozilla/python-zeppelin.svg?branch=master)](https://travis-ci.org/mozilla/python-zeppelin)
 
 ### Requirements
 
