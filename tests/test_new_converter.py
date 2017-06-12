@@ -4,7 +4,7 @@
 
 
 import pytest
-from zeppelin.new_converter import NewConverter
+from zeppelin.converters.markdown import NewConverter
 
 
 @pytest.fixture
