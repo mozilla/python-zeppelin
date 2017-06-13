@@ -10,6 +10,11 @@ setup(
     description='Converts Zeppelin JSON files to Markdown',
     keywords='zeppelin converter markdown',
     url='https://github.com/comloo/python-zeppelin',
+    entry_points={
+    	'console_scripts': [
+    		'zeppelin-convert = zeppelin.cli.convert:main'
+    	],
+    },
     packages=find_packages(),
     setup_requires=['pytest-runner', 'cairosvg'],
     tests_require=['pytest']
