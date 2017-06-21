@@ -12,7 +12,8 @@ setup(
     url='https://github.com/comloo/python-zeppelin',
     entry_points={
     	'console_scripts': [
-    		'zeppelin-convert = zeppelin.cli.convert:main'
+    		'zeppelin-convert = zeppelin.cli.convert:main',
+    		'zeppelin-execute = zeppelin.cli.execute:main'
     	],
     },
     packages=find_packages(),
