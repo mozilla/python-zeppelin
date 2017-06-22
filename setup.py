@@ -17,6 +17,6 @@ setup(
     	],
     },
     packages=find_packages(),
-    setup_requires=['pytest-runner', 'cairosvg'],
+    setup_requires=['pytest-runner', 'cairosvg', 'python-dateutil'],
     tests_require=['pytest']
 )

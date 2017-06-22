@@ -8,7 +8,7 @@ import os
 import cairosvg
 import re
 import base64
-from datetime import datetime
+from dateutil.parser import parse
 
 
 class MarkdownConverter(abc.ABC):
@@ -44,8 +44,8 @@ class MarkdownConverter(abc.ABC):
                   'title: ' + title,
                   'author(s): ' + self.user,
                   'tags: ',
-                  'created_at: ' + self.date_created,
-                  'updated_at: ' + self.date_updated,
+                  'created_at: ' + str(self.date_created),
+                  'updated_at: ' + str(self.date_updated),
                   'tldr: ',
                   'thumbnail: ',
                   '---']
@@ -103,26 +103,21 @@ class MarkdownConverter(abc.ABC):
             else:
                 self.out.append(col_md)
 
-    def parse_date(self, date):
-        """Convert string to date object.
-
-        A sample string with this format is 'Feb 29, 2017 04:39:59 pm'.
-        """
-        return datetime.strptime(date, '%b %d, %Y %I:%M:%S %p')
-
     def process_date_created(self, text):
         """Set date_created to the oldest date (date created)."""
+        date = parse(text)
         if self.date_created == 'N/A':
-            self.date_created = text
-        if self.parse_date(text) < self.parse_date(self.date_created):
-            self.date_created = text
+            self.date_created = date
+        if date < self.date_created:
+            self.date_created = date
 
     def process_date_updated(self, text):
         """Set date_updated to the most recent date (updated date)."""
+        date = parse(text)
         if self.date_updated == 'N/A':
-            self.date_updated = text
-        if self.parse_date(text) > self.parse_date(self.date_updated):
-            self.date_updated = text
+            self.date_updated = date
+        if date > self.date_updated:
+            self.date_updated = date
 
     def process_title(self, text):
         """Append hashtags before the title.
