@@ -4,11 +4,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='zeppelin-converter',
+    name='python-zeppelin',
     author='Wendy Fu',
     author_email='wfu@mozilla.com',
     description='Converts Zeppelin JSON files to Markdown',
-    keywords='zeppelin converter markdown',
+    version='1.0',
+    keywords='zeppelin notebook converter markdown',
     url='https://github.com/comloo/python-zeppelin',
     entry_points={
     	'console_scripts': [
