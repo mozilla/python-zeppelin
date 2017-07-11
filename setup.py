@@ -8,7 +8,7 @@ setup(
     author='Wendy Fu',
     author_email='wfu@mozilla.com',
     description='Converts Zeppelin JSON files to Markdown',
-    version='1.0',
+    version='1.2',
     keywords='zeppelin notebook converter markdown',
     url='https://github.com/comloo/python-zeppelin',
     entry_points={
@@ -18,6 +18,6 @@ setup(
     	],
     },
     packages=find_packages(),
-    install_requires=['pytest-runner', 'cairosvg', 'python-dateutil'],
+    install_requires=['pytest-runner', 'cairosvg', 'python-dateutil', 'requests>=2.18.1'],
     tests_require=['pytest']
 )
