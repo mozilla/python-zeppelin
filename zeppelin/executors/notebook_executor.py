@@ -26,13 +26,24 @@ class NotebookExecutor():
 
     def wait_for_notebook_to_execute(self):
         """Wait for notebook to finish executing before continuing."""
+        attempt = 0
         while True:
             r = requests.get('http://{0}/api/notebook/job/{1}'.format(
                              self.zeppelin_url, self.notebook_id))
+
+            if r.status_code == 500:
+                wait_time = 2**attempt
+                print('Notebook is still busy executing. Checking again in {0} seconds...'
+                      .format(wait_time))
+                time.sleep(wait_time)
+                attempt += 1
+                continue
+
             data = r.json()['body']
             if all(paragraph['status'] in ['FINISHED', 'ERROR'] for paragraph in data):
                 break
-            time.sleep(1)
+
+            time.sleep(2)
 
     def get_executed_notebook(self):
         """Return the executed notebook."""
@@ -69,10 +80,17 @@ class NotebookExecutor():
         body = self.get_executed_notebook()
 
         err = False
+        output = []
         for paragraph in body['paragraphs']:
             if 'results' in paragraph and paragraph['results']['code'] == 'ERROR':
-                print(paragraph['results']['msg'][0]['data'], file=sys.stderr)
+                output.append(paragraph['results']['msg'][0]['data'])
                 err = True
+
+            elif 'result' in paragraph and paragraph['result']['code'] == 'ERROR':
+                output.append(paragraph['result']['msg'])
+                err = True
+
+        [print(e.strip() + '\n', file=sys.stderr) for e in output if e]
 
         if err:
             sys.exit(1)
