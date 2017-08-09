@@ -5,6 +5,10 @@
 - Python 3.\* (Tested on Python 3.6 -- may work on other versions)
 - Cairo: `python-zeppelin` relies on CairoSVG to convert SVG to PNG. Please refer to the [CairoSVG documentation](http://cairosvg.org/documentation/#installation) for installation instructions.
 
+### Installation
+
+`pip install python-zeppelin`
+
 ### Usage
 
 #### Converter
