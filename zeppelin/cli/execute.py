@@ -39,7 +39,7 @@ def main():
             output_path = os.path.join(args.output_path, '')
             notebook_executor = NotebookExecutor(notebook_id, output_path,
                                                  args.zeppelin_url)
-            notebook_executor.execute_notebook()
+            notebook_executor.execute_notebook(t)
         except ValueError as err:
             print(err)
             sys.exit(1)

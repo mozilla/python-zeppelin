@@ -19,6 +19,11 @@ class NotebookExecutor():
         self.output_path = output_path
         self.zeppelin_url = zeppelin_url
 
+    def create_notebook(self, data):
+        r = requests.post('http://{0}/api/notebook'.format(self.zeppelin_url),
+                      json=data)
+        self.notebook_id = r.json()['body']
+
     def run_notebook(self):
         """Call API to execute notebook."""
         requests.post('http://{0}/api/notebook/job/{1}'.format(
@@ -31,11 +36,15 @@ class NotebookExecutor():
                              self.zeppelin_url, self.notebook_id))
 
             if r.status_code == 200:
-                data = r.json()['body']
-                if all(paragraph['status'] in ['FINISHED', 'ERROR'] for paragraph in data):
-                    break
-                time.sleep(5)
-                continue
+                try:
+                    data = r.json()['body']
+                    if all(paragraph['status'] in ['FINISHED', 'ERROR'] for paragraph in data):
+                        break
+                    time.sleep(5)
+                    continue
+                except KeyError as e:
+                    print(e)
+                    print(r.json())
 
             elif r.status_code == 500:
                 print('Notebook is still busy executing. Checking again in 60 seconds...')
@@ -43,7 +52,7 @@ class NotebookExecutor():
                 continue
 
             else:
-                print('ERROR: Unexpected return code:{}'.format(r.status_code))
+                print('ERROR: Unexpected return code: {}'.format(r.status_code))
                 sys.exit(1)
             
 
@@ -69,7 +78,7 @@ class NotebookExecutor():
                   self.output_path +
                   ' -- Please provide a valid absolute path.')
 
-    def execute_notebook(self):
+    def execute_notebook(self, data):
         """Execute input notebook and save it to file.
 
         If no output path given, the output will be printed to stdout.
@@ -77,6 +86,7 @@ class NotebookExecutor():
         If any errors occur from executing the notebook's paragraphs, they will
         be displayed in stderr.
         """
+        self.create_notebook(data)
         self.run_notebook()
         self.wait_for_notebook_to_execute()
         body = self.get_executed_notebook()
