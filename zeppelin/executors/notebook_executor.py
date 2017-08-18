@@ -13,15 +13,16 @@ import time
 class NotebookExecutor():
     """NotebookExecutor is a command line tool to execute a Zeppelin notebook."""
 
-    def __init__(self, notebook_id, output_path, zeppelin_url):
+    def __init__(self, notebook_name, output_path, zeppelin_url):
         """Initialize class object with attributes based on CLI inputs."""
-        self.notebook_id = notebook_id
+        self.notebook_name = notebook_name
         self.output_path = output_path
         self.zeppelin_url = zeppelin_url
 
     def create_notebook(self, data):
+        """Create notebook under notebook directory."""
         r = requests.post('http://{0}/api/notebook'.format(self.zeppelin_url),
-                      json=data)
+                          json=data)
         self.notebook_id = r.json()['body']
 
     def run_notebook(self):
@@ -54,7 +55,6 @@ class NotebookExecutor():
             else:
                 print('ERROR: Unexpected return code: {}'.format(r.status_code))
                 sys.exit(1)
-            
 
     def get_executed_notebook(self):
         """Return the executed notebook."""
@@ -69,7 +69,7 @@ class NotebookExecutor():
     def save_notebook(self, body):
         """Save notebook depending on user provided output path."""
         directory = os.path.dirname(self.output_path)
-        full_path = os.path.join(directory, 'note.json')
+        full_path = os.path.join(directory, self.notebook_name)
         try:
             with open(full_path, 'w') as fh:
                 fh.write(json.dumps(body, indent=2))

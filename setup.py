@@ -8,7 +8,7 @@ setup(
     author='Wendy Fu',
     author_email='wfu@mozilla.com',
     description='Converts Zeppelin JSON files to Markdown. Executes Zeppelin notebooks in command line.',
-    version='1.5',
+    version='1.5.1',
     keywords='zeppelin notebook converter markdown executor api',
     url='https://github.com/comloo/python-zeppelin',
     entry_points={

@@ -29,7 +29,7 @@ def main():
     with open(args.path_to_notebook_json, 'rb') as notebook:
         try:
             t = json.load(notebook)
-            notebook_id = t['id']
+            notebook_name = os.path.basename(args.path_to_notebook_json)
 
             if args.output_path is sys.stdout:
                 args.output_path = ''
@@ -37,7 +37,7 @@ def main():
                 raise ValueError('Output path given is not valid directory.')
 
             output_path = os.path.join(args.output_path, '')
-            notebook_executor = NotebookExecutor(notebook_id, output_path,
+            notebook_executor = NotebookExecutor(notebook_name, output_path,
                                                  args.zeppelin_url)
             notebook_executor.execute_notebook(t)
         except ValueError as err:
